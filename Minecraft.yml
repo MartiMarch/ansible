@@ -1,0 +1,226 @@
+---
+- name: Instalación de un servidor de minecraft
+  hosts: minecraft
+  ignore_errors: yes
+  become: true
+
+  tasks:
+  - name: Instalacion de Git
+    yum:
+      name: git
+      state: present
+
+  - name: Se instalan un conjunto de paquetes
+    yum:
+      name: "@Development Tools"
+      state: present
+
+  - name: Instalacion de JAVA
+    yum:
+      name: java
+      state: present
+
+  - name: Se crea una carpeta para las descargas
+    ansible.builtin.file:
+      path: /descargas
+      state: directory
+
+  - name: Se descarga JDK 16
+    shell: chdir=/descargas wget https://www.dropbox.com/s/5b8g5bq4ztxolqr/jdk-16.0.2_linux-x64_bin.rpm?raw=1
+
+  - name: Se renombra el archivo descargado
+    shell: chdir=/descargas mv 'jdk-16.0.2_linux-x64_bin.rpm?raw=1' jdk-16.0.2_linux-x64_bin.rpm
+
+  - name: Instalación de JDK 16
+    dnf:
+      name: /descargas/jdk-16.0.2_linux-x64_bin.rpm
+      state: present
+
+  - name: Se cre una crpeta principal par el servidor
+    ansible.builtin.file:
+      path: /home/minecraft
+      state: directory
+
+  - name: Se crea la carpeta de copias de seguridad del servidor
+    ansible.builtin.file:
+      path: /home/minecraft/backups
+      state: directory
+
+  - name: Se crea la carpeta donde se creara el servidor
+    ansible.builtin.file:
+      path: /home/minecraft/server
+      state: directory
+
+  - name: Se crea la carpeta donde se guardaran los scripts y el cliente mcron
+    ansible.builtin.file:
+      path: /home/minecraft/tools
+      state: directory
+
+  - name: Se crea el usuario minecrat
+    shell: useradd -r -m -U -d /home/minecraft -s /bin/bash minecraft
+
+  - name: Se crea el grupo minecraft
+    ansible.builtin.group:
+      name: minecraft
+      state: present
+
+  - name: Se clona el repositorio donde esta el cliente mcrcon
+    ansible.builtin.git:
+      repo: https://github.com/Tiiffi/mcrcon.git
+      dest: /home/minecraft/tools
+    become_user: minecraft
+
+  - name: Se asigna al usuario minecraft como propietario de las subcarpetas de /home/minecraft y se cambian los permisos.
+    ansible.builtin.file:
+      path: /home/minecraft
+      owner: minecraft
+      group: minecraft
+      mode: '0750'
+
+  - name: Se compila el cliente mcrcon
+    command: chdir=/home/minecraft/tools/ gcc -std=gnu11 -pedantic -Wall -Wextra -O2 -s -o mcrcon mcrcon.c
+    become_user: minecraft
+
+  - name: Se descarga minecraft en la carpeta /home/minecraft/server
+    get_url:
+      url: https://launcher.mojang.com/v1/objects/a16d67e5807f57fc4e550299cf20226194497dc2/server.jar
+      dest: /home/minecraft/server
+      mode: '0750'
+    become_user: minecraft
+
+  - name: Se cambian los permisos de los archivos que hay en la carpeta /home/minecraft/server
+    ansible.builtin.file:
+      path: /home/minecraft/server
+      owner: minecraft
+      group: minecraft
+      mode: '0750'
+
+  - name: Se ejecuta el servidor con 1Gb de memoria RAM.
+    shell: chdir=/home/minecraft/server java -Xmx1024M -Xms1024M -jar server.jar nogui
+    become_user: minecraft
+
+  - name: Activando EULA modificando el archivo eula.txt
+    ansible.builtin.lineinfile:
+      path: /home/minecraft/server/eula.txt
+      regexp: '^(.*)eula=false(.*)$'
+      line: 'eula=true'
+      backrefs: yes
+    become_user: minecraft
+
+  - name: Permitiendo que los piratillas accedan al servidor
+    ansible.builtin.lineinfile:
+      path: /home/minecraft/server/server.properties
+      regexp: '^(.*)online-mode=true(.*)$'
+      line: 'online-mode=false'
+      backrefs: yes
+    become_user: minecraft
+
+  - name: Asignando la IP local al archivo de configuración
+    ansible.builtin.lineinfile:
+      path: /home/minecraft/server/server.properties
+      regexp: '^(.*)server-ip=(.*)$'
+      line: 'server-ip={{ ip  }}'
+      backrefs: yes
+    become_user: minecraft
+
+  - name: Asignando una contraseña al servidor
+    ansible.builtin.lineinfile:
+      path: /home/minecraft/server/server.properties
+      regexp: '^(.*)rcon.password=(.*)$'
+      line: 'rcon.password={{ contraseña }}'
+      backrefs: yes
+    become_user: minecraft
+
+  - name: Activando el cliente mcron
+    ansible.builtin.lineinfile:
+      path: /home/minecraft/server/server.properties
+      regexp: '^(.*)enable-rcon=false(.*)$'
+      line: 'enable-rcon=true'
+      backrefs: yes
+    become_user: minecraft
+
+  - name: Creando un servicio que inicie el servidor automáticamente
+    copy:
+      dest: /etc/systemd/system/minecraft.service
+      content: |
+        [Unit]
+        Description=Servidor de Minecraft
+        After=network.target
+
+        [Service]
+        User=minecraft
+        Nice=1
+        KillMode=none
+        SuccessExitStatus=0 1
+        ProtectHome=true
+        ProtectSystem=full
+        PrivateDevices=true
+        NoNewPrivilagies=true
+        WorkingDirectory=/home/minecraft/server
+        ExecStart=/home/minecraft/server -Xmx1024M -Xms1024M -jar server.jar nogui
+        ExecStop=/home/minecraft/tools/mcrcon -H localhost -P 25575 -p {{ contraseña  }} stop
+
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: Se reinicians los servicios que existen en Centos 7
+    shell: systemctl daemon-reload
+
+  - name: Iniciando el servicio minecraft.service
+    ansible.builtin.systemd:
+      state: started
+      name: minecraft
+
+  - name: Añadiendo el servicio minecraft al arranque de la máquina
+    ansible.builtin.systemd:
+      name: minecraft
+      enabled: yes
+      masked: no
+
+  - name: Se añade el puerto 255365 (TCP) como excepcion del firewall de forma permanente
+    shell: firewall-cmd --permanent --zone=public --add-port=25565/tcp
+
+  - name: Se reinicia el firewall
+    shell: firewall-cmd --reload
+
+  - name: Creando un servicio que inicie el servidor automáticamente
+    copy:
+      dest: /home/minecraft/tools/backup.sh
+      content: |
+        #!/bin/bash
+
+        function rcon {
+          /home/minecraft/tools/mcrcon -H {{ ip }} -P 25575 -p strong-password "$1"
+        }
+        rcon "save-off"
+        rcon "save-all"
+        tar -cvpzf /home/minecraft/backups/server-$(date +%F-%H-%M).tar.gz /home/minecraft/server
+        rcon "save-on"
+
+        ## Delete older backups
+        find /home/minecraft/backups/ -type f -mtime +7 -name '*.gz' -delete
+    become_user: minecraft
+
+  - name: Haciedo que el script se pueda ejecutar por el usuario minecraft
+    ansible.builtin.file:
+      path: /home/minecraft/tools/backup.sh
+      owner: minecraft
+      group: minecraft
+      mode: '0750'
+
+  - name: Creando regla que ejecutará un backup acada dia a las 23:00
+    ansible.builtin.cron:
+      name: 'Ejecutar backup del servidor de minecraft'
+      minute: '0'
+      hour: '23'
+      job: /opt/minecraft/tools/backup.sh
+
+# https://linuxize.com/post/how-to-install-minecraft-server-on-centos-7/
+# https://minecraft.fandom.com/wiki/Server.properties
+# https://stackoverflow.com/questions/30662069/how-can-i-pass-variable-to-ansible-playbook-in-the-command-line
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/chap-managing_services_with_systemd
+# https://minecraft.fandom.com/wiki/Tutorials/Server_startup_script
+# https://teilgedanken.de/Blog/post/setting-up-a-minecraft-server-using-systemd/
+# DESCARGAR JDK 16
+# https://www.dropboxforum.com/t5/Dropbox-files-folders/Getting-downloading-link-of-files-in-Dropbox-automatically/td-p/263073
+# https://drive.google.com/file/d/13GzQ1pASgG62KIwmhHNwif_ooTt9FKdB/view?usp=sharing
