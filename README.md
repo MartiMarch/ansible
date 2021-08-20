@@ -18,6 +18,6 @@ ansible-playbook <filename> --extra-vars ""
   
 # Configuraciones disponibles
 	
-Minecraft.yaml - Centos 7 - Instalación de un servidor de minecraft 1.17.1
+** Minecraft.yaml - Centos 7 - Instalación de un servidor de minecraft 1.17.1
 
-JenkinsOverKubernetes.yaml - Centos 7 - Instalación de Jenkins sobre Kubernetes utilizando Helm 3 Un único nodo que es maestro y minion.
+** JenkinsOverKubernetes.yaml - Centos 7 - Instalación de Jenkins sobre Kubernetes utilizando Helm 3 Un único nodo que es maestro y minion.
