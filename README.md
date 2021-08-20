@@ -5,7 +5,7 @@ ansible --version
 
 # Generación de una clave SSH
 ssh-keygen
-ssh-copy-id user@ip -p port
+ssh-copy-id {user}@{ip} -p {port}
 
 # Añadiendo máquinas
 vi /etc/ansible/hosts
