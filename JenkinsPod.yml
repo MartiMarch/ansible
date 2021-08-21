@@ -119,7 +119,7 @@ controller:
   targetPort: 8080
   # For minikube, set this to NodePort, elsewhere use LoadBalancer
   # Use ClusterIP if your setup includes ingress controller
-  serviceType: NodePort
+  serviceType: ClusterIP
   # Use Local to preserve the client source IP and avoids a second hop for LoadBalancer and Nodeport type services,
   # but risks potentially imbalanced traffic spreading.
   serviceExternalTrafficPolicy:
@@ -412,7 +412,7 @@ controller:
     annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-    # For Kubernetes >= 1.18 you should 
+    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
     # ingressClassName: nginx
     # Set this path to jenkinsUriPrefix above or use annotations to rewrite path
@@ -736,7 +736,7 @@ persistence:
   ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
   ##   GKE, AWS & OpenStack)
   ##
-  storageClass: jenkins-pv
+  storageClass:
   annotations: {}
   accessMode: "ReadWriteOnce"
   size: "8Gi"
@@ -800,8 +800,8 @@ backup:
   schedule: "0 2 * * *"
   labels: {}
   serviceAccount:
-    create: false
-    name: jenkins
+    create: true
+    name:
     annotations: {}
     # Example for authorization to AWS S3 using kube2iam or IRSA
     # Can also be done using environment variables
