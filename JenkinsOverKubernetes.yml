@@ -187,10 +187,10 @@
     ignore_errors: yes
 
   - name: Añadiendo el repositorio a Helm
-    shell: sudo helm repo add jenkinsci https://charts.jenkins.io
+    shell: helm repo add jenkinsci https://charts.jenkins.io
 
   - name: Se actualiza el repositorio
-    shell: sudo helm repo update
+    shell: helm repo update
 
   - name: Creando el archivo YAML del volumen persistente
     get_url:
