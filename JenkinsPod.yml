@@ -186,7 +186,7 @@ controller:
   # Note if you set this to 'LoadBalancer', you *must* define annotations to secure it. By default
   # this will be an external load balancer and allowing inbound 0.0.0.0/0, a HUGE
   # security risk:  https://github.com/kubernetes/charts/issues/1341
-  agentListenerServiceType: "NodePort"
+  agentListenerServiceType: "ClusterIP"
   # Optionally assign an IP to the LoadBalancer agentListenerService LoadBalancer
   # GKE users: only regional static IPs will work for Service Load balancer.
   agentListenerLoadBalancerIP:
