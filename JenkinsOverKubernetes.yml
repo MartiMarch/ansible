@@ -150,7 +150,7 @@
 
   - name: Se copia el archivo de configuracion a la ruta anterior
     shell: cp /etc/kubernetes/admin.conf ~/.kube/config
-	
+
   - name: Se aplican los cambios de red a Kubernetes
     shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 
