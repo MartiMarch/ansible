@@ -165,6 +165,7 @@
 #  - name: Creando el primer nodo esclavo de Jenkins
 #    shell: kubeadm join {{ ip }}:6443 --token {{ TOKEN.stdout }} --discovery-token-ca-cert-hash sha256:{{ HASH.stdout }}
 
+
   - name: El nodo maestro ahora puede ser un nodo trabajador
     shell: kubectl taint nodes --all node-role.kubernetes.io/master-
     ignore_errors: yes
@@ -192,7 +193,7 @@
   - name: Se actualiza el repositorio
     shell: helm repo update
 
-  - name: Creando el archivo YAML del volumen persistente
+  - name: Descargando el archivo YAML del volumen persistente
     get_url:
       url: https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-volume.yaml
       dest: /descargas/jenkins-volume.yaml
@@ -200,9 +201,17 @@
   - name: Creando volumen persistente
     shell: chdir=/descargas kubectl apply -f jenkins-volume.yaml
 
-  - name: Descargando archivo de configuracion
+  - name: Creando el servicio de Jenkins
     get_url:
-      url: https://raw.githubusercontent.com/MartiMarch/Ansible/ee82554e4919d22023a7810f3d82f4553d8918a7/JenkinsPod.yml
+      url: https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-sa.yaml
+      dest: /descargas/jenkins-sa.yaml
+
+  - name: Instalando servicio de Jenkins
+    shell: chdir=/descargas kubectl apply -f jenkins-sa.yaml
+
+  - name: Descargando archivo de configuracion de Jenkins
+    get_url:
+      url: https://raw.githubusercontent.com/MartiMarch/Ansible/main/JenkinsPod.yml
       dest: /descargas/jenkins-values.yaml
 
   - name: Creando el espacio de Kubernetes para Jenkins
@@ -213,16 +222,16 @@
     shell: chdir=/descargas helm install jenkins -n jenkins -f jenkins-values.yaml jenkinsci/jenkins
     ignore_errors: yes
 
-  - name: Obteniendo la contraseña de Jenkins
-    ansible.builtin.shell: kubectl get secret -n jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64
-    register: PASSW
+#  - name: Obteniendo la contraseña de Jenkins
+#    ansible.builtin.shell: kubectl get secret -n jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64
+#    register: PASSW
 
-  - name: Obteniendo la url de Jenkins
-    ansible.builtin.shell: get -n jenkins -o jsonpath="{.spec.ports[0].nodePort}" services jenkins:kubectl get nodes -n jenkins -o jsonpath="{.spec.ports[0].nodePort}"
-    register: URL
+#  - name: Obteniendo la url de Jenkins
+#    ansible.builtin.shell: get -n jenkins -o jsonpath="{.spec.ports[0].nodePort}" services jenkins:kubectl get nodes -n jenkins -o jsonpath="{.spec.ports[0].nodePort}"
+#    register: URL
 
-  - name: Imprimendo la URL y la contraseña de Jenkins
-    ansible.builtin.debug:
-      msg: La URL es {{ URL.stdout }} y la contraseña es {{ PASSW.stdout }}
+#  - name: Imprimendo la URL y la contraseña de Jenkins
+#    ansible.builtin.debug:
+#      msg: La URL es {{ URL.stdout }} y la contraseña es {{ PASSW.stdout }}
 
 # https://www.jenkins.io/doc/book/installing/kubernetes/
