@@ -219,10 +219,7 @@
   - name: Instalando el Chart de Jenkins desde Helm 3
     shell: chdir=/descargas helm install jenkins -n jenkins -f jenkins-values.yaml jenkinsci/jenkins
     ignore_errors: yes
-
-  - name: Otorgando los permisos correctos a la carpeta descargas
-    shell: chdir=/descargas chown -R 1000:1000 /.
-
+    
 #  - name: Obteniendo la contraseña de Jenkins
 #    ansible.builtin.shell: kubectl get secret -n jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64
 #    register: PASSW
