@@ -1,0 +1,61 @@
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum install epel-release
+# yum install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@192.168.1.37
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# Instalación de Jenkins, Centos 7
+---
+- name: Instalacion de Jenkins
+  hosts: Jenkins
+  tasks:
+  - name: Instalando JDK 1.8.0
+    yum:
+      name: java-1.8.0-openjdk-devel
+      state: present
+
+  - name: Habilitando el repositorio de Jenkins
+    shell: curl --silent --location http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo > /etc/yum.repos.d/jenkins.repo
+
+  - name: Añadiendo el repositorio al sistema
+    shell: rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+
+  - name: Instalando Jenkins
+    yum:
+      name: jenkins
+      state: present
+
+  - name: Iniciando el servicio de Jenkins
+    shell: systemctl start jenkins
+
+  - name: Habilitando el servicio de Jenkins en el arranque
+    shell: systemctl enable jenkins
+
+  - name: Abriendo el puerto 8080
+    shell: firewall-cmd --permanent --zone=public --add-port=8080/tcp
+
+  - name: Reiniciando el firewall
+    shell: firewall-cmd --reload
+
+  - name: Obteniendo la contraseña de Jenkins
+    shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+    register: PASS
+
+  - name: Imprimiendo la contraseña de Jenkins
+    debug:
+      msg: La contraseña es {{ PASS.stdout }}
