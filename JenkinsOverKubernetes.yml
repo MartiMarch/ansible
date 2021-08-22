@@ -30,7 +30,6 @@
 # service network restart
 # ----
 
-
 # Instalación de Kubernetes
 ---
 - name: Instalacion de Jenkins sobre Kubernetes
