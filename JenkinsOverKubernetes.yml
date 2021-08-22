@@ -35,7 +35,6 @@
 ---
 - name: Instalacion de Jenkins sobre Kubernetes
   hosts: Jenkins
-  become: yes
   tasks:
   - name: Instalando yum-utils
     yum:
