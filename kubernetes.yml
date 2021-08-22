@@ -1,0 +1,161 @@
+# ----------------------------------------------------------------------------- *
+# ADVERTENCIA -> Es necesario utilizar dos o más núcleos en la máquina virtual. *
+# ----------------------------------------------------------------------------- *
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum install epel-release
+# yum install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@192.168.1.37
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# -- Habilita la interfaz enp0s3 ycrear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+# -- Comando para instalar el playbook --
+# ansible-playbook kubernetes.yaml --extra-vars "ip={ip}"
+# ----
+
+# Instalación de Kubernetes
+---
+- name: Instalacion de Jenkins sobre Kubernetes
+  hosts: Jenkins
+  tasks:
+  - name: Instalando yum-utils
+    yum:
+      name: yum-utils
+      state: present
+
+  - name: Instalando device-mapper-persistent-data
+    yum:
+      name: device-mapper-persistent-data
+      state: present
+
+  - name: Instalando lvm2
+    yum:
+      name: lvm2
+      state: present
+
+  - name: Instalando httpd
+    yum:
+      name: httpd
+      state: present
+
+  - name: Iniciando el servicio httpd
+    ansible.builtin.systemd:
+      name: httpd
+      state: started
+      enabled: yes
+
+  - name: Añadiendo el repositorio de Docker
+    shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+  - name: Instalando Docker
+    yum:
+      name: docker-ce
+      state: present
+
+  - name: Iniciando el servicio de Docker
+    ansible.builtin.systemd:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: Creando carpetaa para Kubernetes
+    ansible.builtin.file:
+      path: /kubernetes
+      state: directory
+
+  - name: Configurandio el repositorio de Kubernetes
+    shell: |
+      cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      EOF
+  - name: Instalando kubelet
+    yum:
+      name: kubelet-1.20.0-0
+      state: present
+
+  - name: Instalando kubeadm
+    yum:
+      name: kubeadm-1.20.0-0
+      state: present
+
+  - name: Instalando kubectl
+    yum:
+      name: kubectl-1.20.0-0
+      state: present
+
+  - name: Iniciando el servicio kubelet y habilitandolo
+    ansible.builtin.systemd:
+      name: kubelet
+      state: started
+      enabled: yes
+
+  - name: Configurando la red
+    shell: |
+      cat <<EOF > /etc/sysctl.d/k8s.conf
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      EOF
+
+  - name: Se modifica el kernel
+    shell: sysctl --system
+
+  - name: Se configura el firewall
+    shell: echo '1' > /proc/sys/net/ipv4/ip_forward
+
+  - name: Se desactiva Selinux
+    shell: setenforce 0
+
+  - name: Se configura Selinux
+    shell: sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+  - name: Se configura fstab
+    shell: sed -i '/swap/d' /etc/fstab
+
+  - name: Se desactiva swap
+    shell: swapoff -a
+
+  - name: Creando el cluster de kubernetes
+    shell: kubeadm init --apiserver-advertise-address={{ ip }} --pod-network-cidr=10.244.0.0/16
+    ignore_errors: yes
+
+  - name: Se crea un directorio para el archivo de configuracion de Kubernetes
+    ansible.builtin.file:
+      path: ~/kube
+      state: directory
+
+  - name: Se copia el archivo de configuracion a la ruta anterior
+    shell: cp /etc/kubernetes/admin.conf ~/.kube/config
+
+  - name: Se aplican los cambios de red a Kubernetes
+    shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+  - name: El nodo maestro ahora puede ser un nodo trabajador
+    shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+    ignore_errors: yes
