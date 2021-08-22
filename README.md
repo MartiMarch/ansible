@@ -23,3 +23,5 @@ ansible-playbook <filename> --extra-vars ""
 ** JenkinsOverKubernetes.yaml - Centos 7 - Instalación de Jenkins sobre Kubernetes utilizando Helm 3 Un único nodo que es maestro y minion.
 
 ** kubernetes.yaml - Centos 7- Se instala kubernetes, el nodo maestro es el mismo nodo trabajador.
+	
+** jenkins.yaml - Centos 7- Se instala Jenkins.
