@@ -1,6 +1,8 @@
 # Instalación de Ansible
 yum install epel-release
+
 yum install ansible
+
 ansible --version
 
 # Generación de una clave SSH
