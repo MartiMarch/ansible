@@ -1,0 +1,59 @@
+# -- Habilita la interfaz enp0s3 ycrear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@192.168.1.37
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# -- Comando para instalar el playbook --
+# ansible-playbook nifi.yaml
+# ----
+
+# Instalación de Nifi, Centos 7
+---
+- name: Instalacion de Nifi
+  hosts: Nifi
+  tasks:
+
+  - name: Instalando Java
+    yum:
+      name: java-11-openjdk-devel
+      state: present
+
+  - name: Instalando wget
+    yum:
+      name: wget
+      state: present
+
+  - name: Creando la carpeta Descargas
+    shell: mkdir -p /Descargas
+
+  - name: Descargando Nifi
+    shell: chdir=/Descargas wget -nc https://archive.apache.org/dist/nifi/1.13.2/nifi-1.13.2-bin.tar.gz
+
+  - name: Se extrae el zip descargado de Nifi
+    shell: chdir=/Descargas tar -xvzf nifi-1.13.2-bin.tar.gz
+
+  - name: Iniciando Nifi
+    shell: /Descargas/nifi-1.13.2/bin/nifi.sh start
