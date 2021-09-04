@@ -29,3 +29,5 @@ ansible-playbook <filename> --extra-vars ""
 ** jenkins.yaml - Centos 7- Instalación de Jenkins.
 	
 ** Nifi.yaml - Centos 7 - Instalación de Nifi 1.13.2
+
+** sql.yaml - Centos 7 - Instaalción de MySQL 8.0
