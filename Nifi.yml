@@ -55,5 +55,28 @@
   - name: Se extrae el zip descargado de Nifi
     shell: chdir=/Descargas tar -xvzf nifi-1.13.2-bin.tar.gz
 
-  - name: Iniciando Nifi
-    shell: /Descargas/nifi-1.13.2/bin/nifi.sh start
+  - name: Modificando la IP usada por Nifi en http
+    ansible.builtin.lineinfile:
+      path: /Descargas/nifi-1.13.2/conf/nifi.properties
+      regexp: '^(.*)nifi.web.http.host=127.0.0.1(.*)$'
+      line: 'nifi.web.http.host='
+      backrefs: yes
+
+  - name: Vinculando JDK a Nifi en https
+    ansible.builtin.lineinfile:
+      path: /Descargas/nifi-1.13.2/bin/nifi-env.sh
+      regexp: '^(.*)#export JAVA_HOME=/usr/java/jdk1.8.0/(.*)$'
+      line: 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.12.0.7-0.el7_9.x86_64'
+      backrefs: yes
+
+  - name: Instalando Nifi
+    shell: /Descargas/nifi-1.13.2/bin/nifi.sh install
+
+  - name: Iniciando el  servicio de Nifi
+    shell: chdir=/Descargas/nifi-1.13.2/bin service nifi start
+
+  - name: Abriendo el puerto 8080
+    shell: firewall-cmd --permanent --zone=public --add-port=8080/tcp
+
+  - name: Reiniciando el firewall
+    shell: firewall-cmd --reload
