@@ -1,0 +1,66 @@
+# -- Habilita la interfaz enp0s3 ycrear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@{ip}
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+
+# -- Comando para instalar el playbook --
+# ansible-playbook sql.yaml
+# ----
+
+# Instalación de SQL en Centos 7
+---
+
+- name: Instalacion de SQL
+  hosts: SQL
+  tasks:
+
+  - name: Instalando WGET
+    yum:
+      name: wget
+      state: present
+
+  - name: Habilitando el repositorio de MySQL
+    shell: yum -y localinstall https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
+
+  - name: Instalando el servidor de mysql
+    shell: yum -y install mysql-community-server
+
+  - name: Iniciando el servicido de MySQL
+    shell: systemctl start mysqld
+
+  - name: Habilitando el servicio en el arranque
+    shell: systemctl enable mysqld
+
+  - name: Obteniendo la contraseña temporal
+    shell: grep 'temporary password' /var/log/mysqld.log
+    register: PASS
+
+  - name: Imprimiendo la contraseña temporal
+    debug:
+      msg: La contraseña es del servidor SQL es {{ PASS.stdout }}.
