@@ -21,12 +21,13 @@
 
 # Instalación de Jenkins, Centos 7
 ---
-- name: Instalacion de Jenkins
-  hosts: Jenkins
+- name: Instalacion de Jenkins, Maven y SonarQube
+  hosts: DevOps
   tasks:
-  - name: Instalando JDK 1.8.0
+
+  - name: Instalando Java 11
     yum:
-      name: java-1.8.0-openjdk-devel
+      name: java-11-openjdk-devel
       state: present
 
   - name: Habilitando el repositorio de Jenkins
@@ -34,6 +35,14 @@
 
   - name: Añadiendo el repositorio al sistema
     shell: rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+
+  - name: Instalando Daemonize
+    yum:
+      name: daemonize
+      state: present
+
+  - name: Instalando jenkins.noarch
+    shell: yum -y install jenkins.noarch --nogpgcheck
 
   - name: Instalando Jenkins
     yum:
