@@ -20,6 +20,7 @@
 # ssh-copy-id root@192.168.1.37
 # vi /etc/ansible/hosts
 # Añade la IP del ordenador al que quieres apuntar
+# Modifica en eeste yaml el campo "hosts"
 # mkdir Ansible
 # ----
 
@@ -36,8 +37,8 @@
 
 # Instalación de Kubernetes
 ---
-- name: Instalacion de Jenkins sobre Kubernetes
-  hosts: Jenkins
+- name: Instalacion de Kubernetes
+  hosts: kubernetes
   tasks:
   - name: Instalando yum-utils
     yum:
@@ -149,6 +150,9 @@
     ansible.builtin.file:
       path: ~/kube
       state: directory
+
+  - name: Se crea la carpeta del archivo de configuración de Kubernetes
+    shell: mkdir  ~/.kube
 
   - name: Se copia el archivo de configuracion a la ruta anterior
     shell: cp /etc/kubernetes/admin.conf ~/.kube/config
