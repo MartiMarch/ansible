@@ -30,7 +30,7 @@
 # ansible-playbook maven.yaml
 # ----
 
-# Instalación de SQL en Centos 7
+# Instalación de Maven en Centos 7
 ---
 
 - name: Instalacion de Maven
