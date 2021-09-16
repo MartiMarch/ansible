@@ -31,3 +31,5 @@ ansible-playbook <filename> --extra-vars ""
 ** MySQL.yaml - Centos 7 - Instaalción de MySQL 8.0
 
 ** maven.yaml - Centos 7 - Instalación de Maven
+
+** git.yml - Centos 7 - Instalación de Git
