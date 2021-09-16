@@ -1,0 +1,74 @@
+# -- Habilita la interfaz enp0s3 ycrear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@{ip}
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# -- Comando para instalar el playbook --
+# ansible-playbook entorno.yaml
+# ----
+
+# Instalación de un entorno con las siguientes herramientas:
+#
+#  git
+#  JDK 16
+#  Docker
+#  Docker Compose
+#  Maven
+---
+- name: Iniciando el entorno
+  hosts: entorno
+  tasks:
+
+  - name: Instalacion de Git
+    yum:
+      name: git
+      state: present
+
+  - name: Instalando JDK 16
+    yum:
+      name: java-16-openjdk-devel
+      state: present
+
+  - name: Instalando Docker
+    yum:
+      name: docker
+      state: present
+
+  - name: Instalando Curl
+    yum:
+      name: curl
+      state: present
+
+  - name: Descargando Docker-Compose
+    shell: curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+  - name: Añadiendo los permisos a DOcker-Compose
+    shell: chmod +x /usr/local/bin/docker-compose
+
+  - name: Instalacion de Maven
+    yum:
+      name: maven
+      state: present
