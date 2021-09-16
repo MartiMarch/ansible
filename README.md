@@ -29,3 +29,5 @@ ansible-playbook <filename> --extra-vars ""
 ** Nifi.yaml - Centos 7 - Instalación de Nifi 1.13.2
 
 ** MySQL.yaml - Centos 7 - Instaalción de MySQL 8.0
+
+** Maven.yaml - Centos 7 - Instalación de Maven
