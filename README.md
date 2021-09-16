@@ -22,8 +22,6 @@ ansible-playbook <filename> --extra-vars ""
 	
 ** Minecraft.yaml - Centos 7 - Instalación de un servidor de minecraft 1.17.1
 
-** JenkinsOverKubernetes.yaml - Centos 7 - Instalación de Jenkins sobre Kubernetes utilizando Helm 3 Un único nodo que es maestro y minion.
-
 ** kubernetes.yaml - Centos 7- Instala kubernetes, el nodo maestro es el mismo nodo trabajador.
 	
 ** jenkins.yaml - Centos 7- Instalación de Jenkins.
