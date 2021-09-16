@@ -34,4 +34,5 @@ ansible-playbook <filename> --extra-vars ""
 
 ** git.yml - Centos 7 - Instalación de Git
 
+** jdk-16.yml - Centos - Instalación JDK 16
 ** docker.yml - Centos 7 - Instalación de Docker y Docker-Compose
