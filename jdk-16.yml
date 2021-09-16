@@ -1,0 +1,32 @@
+# Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum install epel-release
+# yum install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@192.168.1.37
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# Instalación de JDK 16 en Centos 7
+---
+
+- name: Instalacion de JDK 16
+  hosts: entorno
+  tasks:
+
+  - name: Instalando JDK 16
+    yum:
+      name: java-16-openjdk-devel
+      state: present
