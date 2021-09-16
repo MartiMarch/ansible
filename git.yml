@@ -1,0 +1,43 @@
+# -- Habilita la interfaz enp0s3 ycrear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@{ip}
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# -- Comando para instalar el playbook --
+# ansible-playbook maven.yaml
+# ----
+
+# Instalación de git en Centos 7
+---
+
+- name: Instalacion de Git
+  hosts: entorno
+  tasks:
+
+  - name: Instalacion de Git
+    yum:
+      name: git
+      state: present
