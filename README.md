@@ -33,3 +33,5 @@ ansible-playbook <filename> --extra-vars ""
 ** maven.yaml - Centos 7 - Instalación de Maven
 
 ** git.yml - Centos 7 - Instalación de Git
+
+** docker.yml - Centos 7 - Instalación de Docker y Docker-Compose
