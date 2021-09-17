@@ -54,7 +54,7 @@
     shell: chmod +x /usr/local/bin/docker-compose
 
   - name: Iniciando servicio de Docker
-    shell: systmectl start docker
+    shell: systemctl start docker
 
   - name: Habilitando el servicio de arranque de Docker
     shell: systemctl enable docker
