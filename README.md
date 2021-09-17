@@ -34,6 +34,7 @@ ansible-playbook <filename> --extra-vars ""
 
 ** git.yml - Centos 7 - Instalación de Git
 
+** harbor.yml - Centos 7 - Instalación de Harbor
 ** entorno.yml - Centos 7 - Despliega un servidor con todas las herramientas necesarias para realizar el ciclo DI/CD
 ** jdk-16.yml - Centos - Instalación JDK 16
 ** docker.yml - Centos 7 - Instalación de Docker y Docker-Compose
