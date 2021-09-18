@@ -19,8 +19,6 @@
 # mkdir Ansible
 # ----
 
-# ansible-galaxy collection install community.crypto
-
 # Instalación de Harbor en Centos 7
 ---
 
