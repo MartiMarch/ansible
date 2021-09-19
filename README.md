@@ -41,5 +41,3 @@ ansible-playbook <filename> --extra-vars ""
 ** jdk-16.yml - Centos - Instalación JDK 16
 
 ** docker.yml - Centos 7 - Instalación de Docker y Docker-Compose
-
-** openssl.yml - Centos 7 - Instalación de OpenSSL 3.0
