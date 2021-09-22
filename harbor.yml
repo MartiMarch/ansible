@@ -19,6 +19,8 @@
 # mkdir Ansible
 # ----
 
+# ansible-galaxy collection install community.crypto
+
 # Instalación de Harbor en Centos 7
 ---
 
@@ -35,7 +37,7 @@
     shell: mkdir -p /Harbor
 
   - name: Descargando Harbor
-    shell: chdir=/Harbor wget https://github.com/vmware/harbor/releases/download/v1.2.0/harbor-online-installer-v1.2.0.tgz
+    shell: chdir=/Harbor wget -nc https://github.com/vmware/harbor/releases/download/v1.2.0/harbor-online-installer-v1.2.0.tgz
 
   - name: Descomprimiendo la descarga de Harbor
     shell: chdir=/Harbor tar -xvf harbor-online-installer-v1.2.0.tgz
@@ -44,7 +46,7 @@
     shell: mkdir -p /Harbor/Certificados
 
   - name: Creando el certificado propio
-    shell: chdir=/Harbor/Certificados openssl req -sha256 -x509 -days 365 -nodes -newkey rsa:4096 -keyout  harbor.entorno.com.key -out harbor.entorno.com.crt -subj "/C=ES/ST=Spain/L=Valencia/O=Dybbukk/OU=DevOps/CN=entorno" -addtext "subjectAltName=IP:{{ HARBOR_IP }}"
+    shell: chdir=/Harbor/Certificados openssl req -sha256 -x509 -days 365 -nodes -newkey rsa:4096 -keyout  harbor.entorno.com.key -out harbor.entorno.com.crt -subj "/C=ES/ST=Spain/L=Valencia/O=Dybbukk/OU=DevOps/CN=harbor.entorno.com"
 
   - name: Se crea un enlace simbolico
     shell: chdir=/Harbor/Certificados ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
@@ -114,7 +116,7 @@
   - name: Configurando el DNS
     ansible.builtin.lineinfile:
       path: /etc/hosts
-      line: '{{ HARBOR_IP }}\tharbor.entorno.com'
+      line: "{{ HARBOR_IP }}\tharbor.entorno.com"
       state: present
 
   - name: Añadiendo la IP del servidor HARBOR al JSON
@@ -122,3 +124,21 @@
       dest: /etc/docker/daemon.json
       content: |
         {"insecure-registries":["{{ HARBOR_IP }}:80"]}
+
+  - name: Añadiendo la direccion a OpenSSL
+    ansible.builtin.lineinfile:
+      path: /etc/pki/tls/openssl.cnf
+      insertafter: '# Extensions for a typical CA'
+      line: "subjectAltName=DNS:harbor.entorno.com,IP:192.168.1.38"
+
+  - name: Creando el directorio para el certificado de Docker I
+    shell: mkdir -p /etc/docker/certs.d/harbor.entorno.com:80
+
+  - name: Creando el directorio para el certificado de Docker II
+    shell: mkdir -p /etc/docker/certs.d/harbor.entorno.com
+
+  - name: Copiando el certificado I
+    shell: cp -u /Harbor/Certificados/harbor.entorno.com.crt /etc/docker/certs.d/harbor.entorno.com:80/harbor.entorno.com.crt
+
+  - name: Copiando el certificado II
+    shell: cp -u /Harbor/Certificados/harbor.entorno.com.crt /etc/docker/certs.d/harbor.entorno.com/harbor.entorno.com.crt
