@@ -1,0 +1,104 @@
+# Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum install epel-release
+# yum install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@192.168.1.38
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# Instalación de Nexus 3 en Centos 7
+---
+
+- name: Instalacion e Nexus 3
+  hosts: entorno
+  become: true
+  tasks:
+
+  - name: Instalando wget
+    yum:
+      name: wget
+      state: present
+
+  - name: Creando una carpeta para Nexus
+    shell: mkdir -p /Nexus
+
+  - name: Descargando Nexus
+    shell: chdir=/Nexus wget -nc "https://download.sonatype.com/nexus/3/latest-unix.tar.gz"
+
+  - name: Descomprimiendo lo descargado
+    shell: chdir=/Nexus tar -xvzf latest-unix.tar.gz
+
+  - name: Borrando el comprimido
+    shell: chdir=/Nexus rm latest-unix.tar.gz
+
+  - name: Creando enlace simbolico
+    shell: chdir=/Nexus ln -s nexus-3.* nexus
+    ignore_errors: yes
+
+  - name: Creando usuario para Nexus
+    shell: adduser nexus
+    ignore_errors: yes
+
+  - name: Asignando permisos a Nexus
+    shell: chdir=/Nexus chown -R nexus:nexus nexus* sonatype-work
+
+  - name: Modificando la configuracion de Nexus
+    ansible.builtin.lineinfile:
+      path: /Nexus/nexus/bin/nexus.rc
+      regexp: '^(.*)#run_as_user=""(.*)$'
+      line: 'run_as_user="nexus"'
+      backrefs: yes
+
+  - name: Creando enlace simbolico para el servicio de Nexus
+    shell: chdir=/Nexus ln -s /opt/nexus/bin/nexus /etc/init.d/nexus
+    ignore_errors: yes
+
+  - name: Modificando la IP de Nexus
+    ansible.builtin.lineinfile:
+      path: /Nexus/nexus/etc/nexus-default.properties
+      regexp: '^(.*)application-host=0.0.0.0(.*)$'
+      line: 'application-host={{ NEXUS_IP }}'
+      backrefs: yes
+    become_user: nexus
+
+  - name: Creando el servicio de Nexus
+    copy:
+      dest: /etc/systemd/system/nexus.service
+      content: |
+        [Unit]
+        Description=Nexus Service
+        After=syslog.target network.target
+
+        [Service]
+        Type=forking
+        LimitNOFILE=65536
+        ExecStart=/Nexus/nexus/bin/nexus start
+        ExecStop=/Nexus/nexus/bin/nexus stop
+        User=nexus
+        Group=nexus
+        Restart=on-failure
+
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: Reiniciando el daemon
+    shell: systemctl daemon-reload
+
+  - name: Iniciando el sevicio de Nexus en el arranque
+    shell: systemctl enable nexus.service
+
+  - name: Iniciando el servicio de Nexus
+    shell: systemctl start nexus.service
