@@ -27,7 +27,7 @@
 # ----
 
 # -- Comando para instalar el playbook --
-# ansible-playbook maven.yaml
+# ansible-playbook git.yaml
 # ----
 
 # Instalación de git en Centos 7
