@@ -16,7 +16,7 @@ vi /etc/ansible/hosts
 ansible -m ping all
 
 # Lanzando Ansible
-ansible-playbook <filename> --extra-vars ""
+ansible-playbook {filename.yml} --extra-vars "{naem var}={value var}"
   
 # Configuraciones disponibles
 	
