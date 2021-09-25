@@ -1,0 +1,39 @@
+# Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum install epel-release
+# yum install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@192.168.1.38
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# Instalación de Helm 3 en Centos 7
+---
+
+- name: Instaalcion e Helm 3
+  hosts: entorno
+  tasks:
+
+  - name: Creano carpeta para Helm
+    shell: mkdir -p /Helm
+
+  - name: Descargando Helm 3
+    shell: curl -fsSL -o /Helm/get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+  - name: Otorgando permisos al instaldor
+    shell: chdir=/Helm chmod 700 get_helm.sh
+
+  - name: Ejecutando el script
+    shell: chdir=/Helm ./get_helm.sh
