@@ -129,7 +129,7 @@
     ansible.builtin.lineinfile:
       path: /etc/pki/tls/openssl.cnf
       insertafter: '# Extensions for a typical CA'
-      line: "subjectAltName=DNS:harbor.entorno.com,IP:192.168.1.38"
+      line: "subjectAltName=DNS:harbor.entorno.com,IP:{{ HARBOR_IP }}"
 
   - name: Creando el directorio para el certificado de Docker I
     shell: mkdir -p /etc/docker/certs.d/harbor.entorno.com:80
