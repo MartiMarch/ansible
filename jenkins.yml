@@ -60,11 +60,3 @@
 
   - name: Reiniciando el firewall
     shell: firewall-cmd --reload
-
-  - name: Obteniendo la contraseña de Jenkins
-    shell: cat /var/lib/jenkins/secrets/initialAdminPassword
-    register: PASS
-
-  - name: Imprimiendo la contraseña de Jenkins
-    debug:
-      msg: La contraseña es {{ PASS.stdout }}
