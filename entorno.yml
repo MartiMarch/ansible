@@ -57,15 +57,9 @@
       name: wget
       state: present
 
-  - name: Se descarga JDK 16
-    shell: chdir=/descargas wget -nc https://www.dropbox.com/s/5b8g5bq4ztxolqr/jdk-16.0.2_linux-x64_bin.rpm?raw=1
-
-  - name: Se renombra el archivo descargado
-    shell: chdir=/descargas mv 'jdk-16.0.2_linux-x64_bin.rpm?raw=1' jdk-16.0.2_linux-x64_bin.rpm
-
-  - name: Instalación de JDK 16
+  - name: Instalando Java 11
     yum:
-      name: /descargas/jdk-16.0.2_linux-x64_bin.rpm
+      name: java-11-openjdk-devel
       state: present
 
   - name: Instalando Curl
@@ -291,12 +285,6 @@
         [Install]
         WantedBy=multi-user.target
 
-  - name: Abriendo el puerto
-    shell: firewall-cmd --permanent --add-port=8081/tcp
-
-  - name: Reiniciando el firewall
-    shell: firewall-cmd --reload
-
   - name: Reiniciando el daemon
     shell: systemctl daemon-reload
 
@@ -305,3 +293,9 @@
 
   - name: Iniciando el servicio de Nexus
     shell: systemctl start nexus.service
+
+  - name: Abriendo el puerto
+    shell: firewall-cmd --permanent --add-port=8081/tcp
+
+  - name: Reiniciando el firewall
+    shell: firewall-cmd --reload
