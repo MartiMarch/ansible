@@ -1,4 +1,4 @@
-# -- Habilita la interfaz enp0s3 ycrear Adaptador puente --
+# Habilita la interfaz enp0s3 ycrear Adaptador puente --
 # Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
 # Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
@@ -47,14 +47,25 @@
       name: git
       state: present
 
-  - name: Instalando JDK 16
+  - name: Se crea una carpeta para las descargas
+    ansible.builtin.file:
+      path: /descargas
+      state: directory
+
+  - name: Instalando Wget
     yum:
-      name: java-16-openjdk-devel
+      name: wget
       state: present
 
-  - name: Instalando Docker
+  - name: Se descarga JDK 16
+    shell: chdir=/descargas wget -nc https://www.dropbox.com/s/5b8g5bq4ztxolqr/jdk-16.0.2_linux-x64_bin.rpm?raw=1
+
+  - name: Se renombra el archivo descargado
+    shell: chdir=/descargas mv 'jdk-16.0.2_linux-x64_bin.rpm?raw=1' jdk-16.0.2_linux-x64_bin.rpm
+
+  - name: Instalación de JDK 16
     yum:
-      name: docker
+      name: /descargas/jdk-16.0.2_linux-x64_bin.rpm
       state: present
 
   - name: Instalando Curl
@@ -62,13 +73,235 @@
       name: curl
       state: present
 
+  - name: Instalando Docker
+    yum:
+      name: docker
+      state: present
+
   - name: Descargando Docker-Compose
     shell: curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
-  - name: Añadiendo los permisos a DOcker-Compose
+  - name: Añadiendo los permisos a Docker-Compose
     shell: chmod +x /usr/local/bin/docker-compose
 
-  - name: Instalacion de Maven
+  - name: Iniciando servicio de Docker
+    shell: systemctl start docker
+
+  - name: Habilitando el servicio de arranque de Docker
+    shell: systemctl enable docker
+
+  - name: Instalando Maven
     yum:
       name: maven
       state: present
+
+  - name: Instalando httpd
+    yum:
+      name: httpd
+      state: present
+
+  - name: Iniciando el servicio httpd
+    ansible.builtin.systemd:
+      name: httpd
+      state: started
+      enabled: yes
+
+  - name: Creando carpetaa para Kubernetes
+    ansible.builtin.file:
+      path: /kubernetes
+      state: directory
+
+  - name: Configurandio el repositorio de Kubernetes
+    shell: |
+      cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      EOF
+
+  - name: Instalando kubelet
+    yum:
+      name: kubelet-1.20.0-0
+      state: present
+
+  - name: Instalando kubeadm
+    yum:
+      name: kubeadm-1.20.0-0
+      state: present
+
+  - name: Instalando kubectl
+    yum:
+      name: kubectl-1.20.0-0
+      state: present
+
+  - name: Iniciando el servicio kubelet y habilitandolo
+    ansible.builtin.systemd:
+      name: kubelet
+      state: started
+      enabled: yes
+
+  - name: Configurando la red
+    shell: |
+      cat <<EOF > /etc/sysctl.d/k8s.conf
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      EOF
+
+  - name: Se modifica el kernel
+    shell: sysctl --system
+
+  - name: Se desactiva Selinux
+    shell: setenforce 0
+
+  - name: Se configura Selinux
+    shell: sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+  - name: Se configura fstab
+    shell: sed -i '/swap/d' /etc/fstab
+
+  - name: Se desactiva swap
+    shell: swapoff -a
+
+  - name: Creando el cluster de kubernetes
+    shell: kubeadm init --apiserver-advertise-address={{ ip }} --pod-network-cidr=10.244.0.0/16
+    ignore_errors: yes
+
+  - name: Se crea un directorio para el archivo de configuracion de Kubernetes
+    ansible.builtin.file:
+      path: ~/kube
+      state: directory
+
+  - name: Se crea la carpeta del archivo de configuración de Kubernetes
+    shell: mkdir -p  ~/.kube
+
+  - name: Se copia el archivo de configuracion a la ruta anterior
+    shell: cp -u /etc/kubernetes/admin.conf ~/.kube/config
+
+  - name: Se aplican los cambios de red a Kubernetes
+    shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+  - name: El nodo maestro ahora puede ser un nodo trabajador
+    shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+    ignore_errors: yes
+
+  - name: Creano carpeta para Helm
+    shell: mkdir -p /Helm
+
+  - name: Descargando Helm 3
+    shell: curl -fsSL -o /Helm/get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+  - name: Otorgando permisos al instaldor
+    shell: chdir=/Helm chmod 700 get_helm.sh
+
+  - name: Ejecutando el script
+    shell: chdir=/Helm ./get_helm.sh
+
+  - name: Habilitando el repositorio de Jenkins
+    shell: curl --silent --location http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo > /etc/yum.repos.d/jenkins.repo
+
+  - name: Añadiendo el repositorio al sistema
+    shell: rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+
+  - name: Instalando Daemonize
+    yum:
+      name: daemonize
+      state: present
+
+  - name: Instalando jenkins.noarch
+    shell: yum -y install jenkins.noarch --nogpgcheck
+
+  - name: Instalando Jenkins
+    yum:
+      name: jenkins
+      state: present
+
+  - name: Iniciando el servicio de Jenkins
+    shell: systemctl start jenkins
+
+  - name: Habilitando el servicio de Jenkins en el arranque
+    shell: systemctl enable jenkins
+
+  - name: Abriendo el puerto 8080
+    shell: firewall-cmd --permanent --zone=public --add-port=8080/tcp
+
+  - name: Reiniciando el firewall
+    shell: firewall-cmd --reload
+
+  - name: Creando una carpeta para Nexus
+    shell: mkdir -p /Nexus
+
+  - name: Descargando Nexus
+    shell: chdir=/Nexus wget -nc "https://download.sonatype.com/nexus/3/latest-unix.tar.gz"
+
+  - name: Descomprimiendo lo descargado
+    shell: chdir=/Nexus tar -xvzf latest-unix.tar.gz
+
+  - name: Borrando el comprimido
+    shell: chdir=/Nexus rm latest-unix.tar.gz
+
+  - name: Creando enlace simbolico
+    shell: chdir=/Nexus ln -s nexus-3.* nexus
+    ignore_errors: yes
+
+  - name: Creando usuario para Nexus
+    shell: adduser nexus
+    ignore_errors: yes
+
+  - name: Asignando permisos a Nexus
+    shell: chdir=/Nexus chown -R nexus:nexus nexus* sonatype-work
+
+  - name: Modificando la configuracion de Nexus
+    ansible.builtin.lineinfile:
+      path: /Nexus/nexus/bin/nexus.rc
+      regexp: '^(.*)#run_as_user=""(.*)$'
+      line: 'run_as_user="nexus"'
+      backrefs: yes
+
+  - name: Creando enlace simbolico para el servicio de Nexus
+    shell: chdir=/Nexus ln -s /Nexus/nexus/bin/nexus /etc/init.d/nexus
+    ignore_errors: yes
+
+  - name: Modificando la IP de Nexus
+    ansible.builtin.lineinfile:
+      path: /Nexus/nexus/etc/nexus-default.properties
+      regexp: '^(.*)application-host=0.0.0.0(.*)$'
+      line: 'application-host={{ NEXUS_IP }}'
+      backrefs: yes
+    become_user: nexus
+
+  - name: Creando el servicio de Nexus
+    copy:
+      dest: /etc/systemd/system/nexus.service
+      content: |
+        [Unit]
+        Description=Nexus Service
+        After=syslog.target network.target
+        [Service]
+        Type=forking
+        LimitNOFILE=65536
+        ExecStart=/Nexus/nexus/bin/nexus start
+        ExecStop=/Nexus/nexus/bin/nexus stop
+        User=nexus
+        Group=nexus
+        Restart=on-failure
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: Abriendo el puerto
+    shell: firewall-cmd --permanent --add-port=8081/tcp
+
+  - name: Reiniciando el firewall
+    shell: firewall-cmd --reload
+
+  - name: Reiniciando el daemon
+    shell: systemctl daemon-reload
+
+  - name: Iniciando el sevicio de Nexus en el arranque
+    shell: systemctl enable nexus.service
+
+  - name: Iniciando el servicio de Nexus
+    shell: systemctl start nexus.service
