@@ -1,0 +1,80 @@
+# Habilita la interfaz enp0s3 ycrear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@{ip}
+# vi /etc/ansible/hosts
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+
+# -- Comando para instalar el playbook --
+# ansible-playbook html-php.yaml
+# ----
+
+# Instalación de HTML y PHP en Centos 7
+---
+
+- name: Instalacion de HTML y PHP
+  hosts: web
+  tasks:
+
+  - name: Instalando httpd
+    yum:
+      name: httpd
+      state: present
+
+  - name: Configurando firewall para apache I
+    shell: firewall-cmd --permanent --add-service=http
+
+  - name: Configurando firewall para apache II
+    shell: firewall-cmd --permanent --add-service=https
+
+  - name: Configurando firewall para apache III
+    shell: firewall-cmd --reload
+
+  - name: Iniciando apache
+    shell: systemctl start httpd
+
+  - name: Habilitando apache
+    shell: systemctl enable httpd
+
+  - name: Instalando epel-release
+    yum:
+      name: epel-release
+      state: present
+
+  - name: Instlaando yum-utils
+    yum:
+      name: yum-utils
+      state: present
+
+  - name: Instalando el repositorio de PHP
+    shell: yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+  - name: Habilitando el prositorio
+    shell: yum-config-manager --enable remi-php73
+
+  - name: instalando PHP
+    shell: yum -y install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysqlnd
