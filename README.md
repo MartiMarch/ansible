@@ -43,3 +43,5 @@ ansible-playbook {filename.yml} --extra-vars "{name var}={value var}"
 ** docker.yml - Centos 7 - Instalación de Docker y Docker-Compose
 
 ** helm3.yml - Centos 7 - Instalación de Helm 3
+
+** html-php.yml - Centos 7 - Instlación de HTTP y PHP
