@@ -32,7 +32,7 @@
 # ----
 
 # -- Comando para instalar el playbook --
-# ansible-playbook kubernetes.yaml --extra-vars "ip={ip}"
+# ansible-playbook kubernetes.yml --extra-vars "ip={ip}"
 # ----
 
 # Instalación de Kubernetes
