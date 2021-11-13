@@ -37,6 +37,8 @@
 #  Docker
 #  Docker Compose
 #  Maven
+#  Kubernetes
+#  Nexus
 ---
 - name: Iniciando el entorno
   hosts: entorno
