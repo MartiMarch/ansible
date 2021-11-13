@@ -27,7 +27,7 @@
 # ----
 
 # -- Comando para instalar el playbook --
-# ansible-playbook entorno.yaml
+# ansible-playbook entorno.yaml --extra-vars "ip="
 # ----
 
 # Instalación de un entorno con las siguientes herramientas:
