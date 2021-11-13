@@ -36,6 +36,7 @@
 #  JDK 16
 #  Docker
 #  Docker Compose
+#  Helm
 #  Maven
 #  Kubernetes
 #  Nexus
