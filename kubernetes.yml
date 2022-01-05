@@ -198,7 +198,7 @@
 #    shell: iptables -tnat --flush
 
 #  - name: Iniciando kubelete
-    shell: systemctl start kubelet
+#    shell: systemctl start kubelet
 
 #  - name: Iniciando Docker
 #    shell: systemctl start docker
