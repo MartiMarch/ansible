@@ -176,8 +176,14 @@
       line: alias k='kubectl -n kube-system'
       insertbefore: BOF
 
+  - name: Creando carpeta para kubernetes
+    shell: mkdir -p /kubernetes
+
+  - name: Descargando kubernetes-metrics
+    shell: chdir=/kubernetes wget https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
+
   - name: Instalando kubernetes-metrics
-    shell: kubectl apply -f https://github.com/MartiMarch/Kubernetes/blob/main/kubernetes-metrics/components.yaml
+    shell: chdir=/kubernetes kubectl apply -f components.yaml -n kube-system
 
   - name: Deteniendo Docker
     shell: systemctl stop docker
