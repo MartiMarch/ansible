@@ -179,26 +179,32 @@
   - name: Creando carpeta para kubernetes
     shell: mkdir -p /kubernetes
 
-#  - name: Descargando kubernetes-metrics
-#    shell: chdir=/kubernetes wget https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
+  - name: Creano carpeta para Helm
+    shell: mkdir -p /Helm
 
-#  - name: Instalando kubernetes-metrics
-#    shell: chdir=/kubernetes kubectl apply -f components.yaml -n kube-system
+  - name: Descargando Helm 3
+    shell: curl -fsSL -o /Helm/get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 
-#  - name: Deteniendo Docker
-#    shell: systemctl stop docker
+  - name: Otorgando permisos al instaldor
+    shell: chdir=/Helm chmod 700 get_helm.sh
 
-#  - name: Deteniendo kubelet
-#    shell: systemctl stop kubelet
+  - name: Ejecutando el script
+    shell: chdir=/Helm ./get_helm.sh
+    
+  - name: Añadiendo el repositorio de kubernetes-metrics a Helm
+    shell: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ -n kube-system
+    
+  - name: Instalando kubernetes-metrics desde helm
+    shell: helm upgrade --install metrics-server metrics-server/metrics-server -n kube-system
+    
+  - name: Creando carpeta para los yaml de Kubernetes
+    shell: mkdir -p /kubernetes
 
-#  - name: Purgando iptable I
-#    shell: iptables --flush
-
-#  - name: Purgando iptable II
-#    shell: iptables -tnat --flush
-
-#  - name: Iniciando kubelete
-#    shell: systemctl start kubelet
-
-#  - name: Iniciando Docker
-#    shell: systemctl start docker
+  - name: Eliminando el Deployment de kubernetes-metrics
+    shell: kubectl delete deployment.apps/metrics-server
+    
+  - name: Descargnado el deployment correcto
+    shell: chdir=/kubernetes wget -nc https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
+    
+  - name: Creando el Deployment de kubernetes-metrics
+    shell: chdir=/kubernetes kubectl -n kube-system apply -f components.yaml
