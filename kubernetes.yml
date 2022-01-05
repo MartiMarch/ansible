@@ -173,32 +173,32 @@
   - name: Creando el alias ksys=kubectl -n kube-sys
     lineinfile:
       path: ~/.bashrc
-      line: alias k='kubectl -n kube-system'
+      line: alias ksys='kubectl -n kube-system'
       insertbefore: BOF
 
   - name: Creando carpeta para kubernetes
     shell: mkdir -p /kubernetes
 
-  - name: Descargando kubernetes-metrics
-    shell: chdir=/kubernetes wget https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
+#  - name: Descargando kubernetes-metrics
+#    shell: chdir=/kubernetes wget https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
 
-  - name: Instalando kubernetes-metrics
-    shell: chdir=/kubernetes kubectl apply -f components.yaml -n kube-system
+#  - name: Instalando kubernetes-metrics
+#    shell: chdir=/kubernetes kubectl apply -f components.yaml -n kube-system
 
-  - name: Deteniendo Docker
-    shell: systemctl stop docker
+#  - name: Deteniendo Docker
+#    shell: systemctl stop docker
 
-  - name: Deteniendo kubelet
-    shell: systemctl stop kubelet
+#  - name: Deteniendo kubelet
+#    shell: systemctl stop kubelet
 
-  - name: Purgando iptable I
-    shell: iptables --flush
+#  - name: Purgando iptable I
+#    shell: iptables --flush
 
-  - name: Purgando iptable II
-    shell: iptables -tnat --flush
+#  - name: Purgando iptable II
+#    shell: iptables -tnat --flush
 
-  - name: Iniciando kubelete
+#  - name: Iniciando kubelete
     shell: systemctl start kubelet
 
-  - name: Iniciando Docker
-    shell: systemctl start docker
+#  - name: Iniciando Docker
+#    shell: systemctl start docker
