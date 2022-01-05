@@ -152,7 +152,7 @@
       state: directory
 
   - name: Se crea la carpeta del archivo de configuración de Kubernetes
-    shell: mkdir  ~/.kube
+    shell: mkdir -p ~/.kube
 
   - name: Se copia el archivo de configuracion a la ruta anterior
     shell: cp /etc/kubernetes/admin.conf ~/.kube/config
