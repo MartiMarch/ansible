@@ -196,3 +196,7 @@
     
   - name: Instalando kubernetes-metrics desde helm
     shell: helm upgrade --install metrics-server metrics-server/metrics-server -n kube-system
+
+  - mame: ADVERTENCIA -> modifica el deployment de kubernetes-metrics en kune-system o ks para dehabilitar el tls
+    debug: 
+      msg="imagePullPolicy: IfNotPresent\ncommand:\n- /metrics-server\n- --kubelet-insecure-tls"
