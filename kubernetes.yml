@@ -226,4 +226,7 @@
 
   - mame: ADVERTENCIA -> modifica el deployment de kubernetes-metrics en kune-system o ks para dehabilitar el tls
     debug: 
-      msg="imagePullPolicy: IfNotPresent\ncommand:\n- /metrics-server\n- --kubelet-insecure-tls"
+      msg:
+      - "imagePullPolicy: IfNotPresent\ncommand:"
+      - "- /metrics-server"
+      - "- --kubelet-insecure-tls"
