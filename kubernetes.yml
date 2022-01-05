@@ -196,15 +196,3 @@
     
   - name: Instalando kubernetes-metrics desde helm
     shell: helm upgrade --install metrics-server metrics-server/metrics-server -n kube-system
-    
-  - name: Creando carpeta para los yaml de Kubernetes
-    shell: mkdir -p /kubernetes
-
-  - name: Eliminando el Deployment de kubernetes-metrics
-    shell: kubectl -n kube-system delete deployment.apps/metrics-server
-    
-  - name: Descargnado el deployment correcto
-    shell: chdir=/kubernetes wget -nc https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
-    
-  - name: Creando el Deployment de kubernetes-metrics
-    shell: chdir=/kubernetes kubectl -n kube-system apply -f components.yaml
