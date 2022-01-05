@@ -169,3 +169,30 @@
       path: ~/.bashrc
       line: alias k='kubectl'
       insertbefore: BOF
+ 
+   - name: Creando el alias ksys=kubectl -n kube-sys
+    lineinfile:
+      path: ~/.bashrc
+      line: alias k='kubectl -n kube-system'
+      insertbefore: BOF
+ 
+  - name: Instalando kubernetes-metrics
+    shell: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+  - name: Deteniendo Docker
+    shell: systemctl stop docker
+
+  - name: Deteniendo kubelet
+    shell: systemctl stop kubelet
+
+  - name: Purgando iptable I
+    shell: iptables --flush
+
+  - name: Purgando iptable II
+    shell: iptables -tnat --flush
+
+  - name: Iniciando kubelete
+    shell: systemctl start kubelet
+
+  - name: Iniciando Docker
+    shell: systemctl start docker
