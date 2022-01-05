@@ -214,7 +214,11 @@
 
   - name: Iniciando docker
     shell: systemctl start docker
-  
+
+  - name: Esperando a que kubernetes arranque
+    pause:
+      minutes: 1
+
   - name: Matando el deployment de kubernetes-metrics
     shell: kubectl -n kube-system delete deployment.apps/metrics-server
   
