@@ -196,6 +196,33 @@
     
   - name: Instalando kubernetes-metrics desde helm
     shell: helm upgrade --install metrics-server metrics-server/metrics-server -n kube-system
+    
+  - name: Parando docker
+    shell: systemctl stop docker
+    
+  - name: Parando kubelete
+    shell: systemctl stop kubelet
+    
+  - name: Purgando iptables I
+    shell: iptables --flush
+  
+  - name: Purgando iptables II
+    shell: iptables -tnat --flush
+    
+  - name: Iniciando kubelete
+    shell: systemctl start kubelet
+
+  - name: Iniciando docker
+    shell: systemctl start docker
+  
+  - name: Matando el deployment de kubernetes-metrics
+    shell: kubectl -n kube-system delete deployment.apps/metrics-server
+  
+  - name: Descargando Deployment para kubernetes-metrics
+    shell: chdir=/kubernetes wget -nc https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
+    
+  - name: Creando el deployment de kubernetes-metrics
+    shell: chdir=/kubernetes kubectl -n kube-system apply -f components.yaml
 
   - mame: ADVERTENCIA -> modifica el deployment de kubernetes-metrics en kune-system o ks para dehabilitar el tls
     debug: 
