@@ -305,6 +305,6 @@
 
   - name: Creando el alias k=kubectl
     lineinfile:
-    path: ~/.bashrc
-    line: alias k='kubectl'
-    insertbefore: BOF
+      path: ~/.bashrc
+      line: alias k='kubectl'
+      insertbefore: BOF
