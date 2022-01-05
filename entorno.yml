@@ -302,3 +302,9 @@
 
   - name: Reiniciando el firewall
     shell: firewall-cmd --reload
+
+  - name: Creando el alias k=kubectl
+    lineinfile:
+    path: ~/.bashrc
+    line: alias k='kubectl'
+    insertbefore: BOF
