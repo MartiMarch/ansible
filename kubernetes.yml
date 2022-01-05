@@ -170,7 +170,7 @@
       line: alias k='kubectl'
       insertbefore: BOF
  
-   - name: Creando el alias ksys=kubectl -n kube-sys
+  - name: Creando el alias ksys=kubectl -n kube-sys
     lineinfile:
       path: ~/.bashrc
       line: alias k='kubectl -n kube-system'
