@@ -163,3 +163,9 @@
   - name: El nodo maestro ahora puede ser un nodo trabajador
     shell: kubectl taint nodes --all node-role.kubernetes.io/master-
     ignore_errors: yes
+
+  - name: Creando el alias k=kubectl
+    lineinfile:
+      path: ~/.bashrc
+      line: alias k='kubectl'
+      insertbefore: BOF
