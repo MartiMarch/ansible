@@ -201,7 +201,7 @@
     shell: mkdir -p /kubernetes
 
   - name: Eliminando el Deployment de kubernetes-metrics
-    shell: kubectl delete deployment.apps/metrics-server
+    shell: kubectl -n kube-system delete deployment.apps/metrics-server
     
   - name: Descargnado el deployment correcto
     shell: chdir=/kubernetes wget -nc https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
