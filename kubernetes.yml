@@ -224,9 +224,10 @@
   - name: Creando el deployment de kubernetes-metrics
     shell: chdir=/kubernetes kubectl -n kube-system apply -f components.yaml
 
-  - mame: ADVERTENCIA -> modifica el deployment de kubernetes-metrics en kune-system o ks para dehabilitar el tls
-    debug: 
+  - name: ADVERTENCIA modifica el deployment de kubernetes-metrics en kune-system o ks para dehabilitar el tls
+    ansible.builtin.debug:
       msg:
-      - "imagePullPolicy: IfNotPresent\ncommand:"
+      - "imagePullPolicy: IfNotPresent"
+      - "command:"
       - "- /metrics-server"
       - "- --kubelet-insecure-tls"
