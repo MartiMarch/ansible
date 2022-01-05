@@ -175,9 +175,9 @@
       path: ~/.bashrc
       line: alias k='kubectl -n kube-system'
       insertbefore: BOF
- 
+
   - name: Instalando kubernetes-metrics
-    shell: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    shell: kubectl apply -f https://github.com/MartiMarch/Kubernetes/blob/main/kubernetes-metrics/components.yaml
 
   - name: Deteniendo Docker
     shell: systemctl stop docker
