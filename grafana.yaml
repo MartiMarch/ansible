@@ -1,0 +1,80 @@
+# -- Habilitar la interfaz enp0s3 y crear Adaptador puente --
+# Habilitar la interfaz enp0s3 y crear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@{ip}
+# vi /etc/ansible/hosts
+# En caso de que no funcione:
+# ssh-copy-id -i root@{ip}
+# ansible all -m ping -vvv
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# -- Comando para instalar el playbook --
+# ansible-playbook grafana.yaml
+# ----
+
+# -- Herramientas instaladas --
+#  Grafana
+# ----
+---
+- name: Iniciando el entorno
+  hosts: tools
+  tasks:
+
+  - name: Creando la carpeta para Grafana
+    shell: mkdir -p /home/kubernetes
+
+  - name: Creando el namespace monitoring
+    shell: hubectl create namespace monitoring
+    ignore_errors: yes
+
+  - name: Descargando el servicio de Grafana
+    shell: curl -o /home/kubernetes/grafana/grafana-service.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/grafana/grafana-service.yaml"
+
+  - name: Descargando el volumen persitente de Grafana
+    shell: curl -o /home/kubernetes/grafana/grafana-pv.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/grafana/grafana-pv.yaml"
+
+  - name: Descargando la reclamacion de volumen persistente de Grafana
+    shell: curl -o /home/kubernetes/grafana/grafana-pvc.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/grafana/grafana-pvc.yaml"
+
+  - name: Descargando el deployment de Grafana
+    shell: curl -o /home/kubernetes/grafana/grafana-deployment.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/grafana/grafana-deployment.yaml"
+
+  - name: Cargando el servicio de Grafana
+    shell: chdir=/home/kubernetes/grafana kubectl -n monitoring apply -f grafana-service.yaml
+
+  - name: Cargando el volumen persitente de Grafana
+    shell: chdir=/home/kubernetes/grafana kubectl -n monitoring apply -f grafana-pv.yaml
+
+  - name: Cargando la reclamacion de volumen persistente de Grafana
+    shell: chdir=/home/kubernetes/grafana kubectl -n monitoring apply -f grafana-pvc.yaml
+
+  - name: Creando carpeta para Grafana
+    shell: mkdir -p /grafana
+
+  - name: Otorgando permisos a la carpeta de graphana
+    shell: chown 472:472 /grafana
+
+  - name: Cargando el deployment de Grafana
+    shell: chdir=/home/kubernetes/grafana kubectl -n monitoring apply -f grafana-deployment.yaml
