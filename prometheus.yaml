@@ -1,0 +1,85 @@
+# -- Habilitar la interfaz enp0s3 y crear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@{ip}
+# vi /etc/ansible/hosts
+# En caso de que no funcione:
+# ssh-copy-id -i root@{ip}
+# ansible all -m ping -vvv
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# -- Comando para instalar el playbook --
+# ansible-playbook prometheus.yaml
+# ----
+
+# -- Herramientas instaladas --
+#  Prometheus
+# ----
+- name: Iniciando el entorno
+  hosts: tools
+  tasks:
+
+  - name: Creando la carpeta para descargar los yaml
+    shell: mkdir -p /home/kubernetes/prometheus
+
+  - name: Descargando ConfigMap de Prometheus
+    shell: chdir=/kubernetes curl -o /home/kubernetes/prometheus/prometheus-configMap.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/prometheus/prometheus-configMap.yaml"
+
+  - name: Descargando el rol de Prometheus
+    shell: chdir=/kubernetes curl -o /home/kubernetes/prometheus/prometheus-role.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/prometheus/prometheus-role.yaml"
+
+  - name: Descargando el servicio de Prometheus
+    shell: chdir=/kubernetes curl -o ./prometheus-service.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/prometheus/prometheus-service.yaml"
+
+  - name: Descargando el volumen persitente de Prometheus
+    shell: chdir=/kubernetes curl -o /home/kubernetes/prometheus/prometheus-pv.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/prometheus/prometheus-pv.yml"
+
+  - name: Descargando la relamación de volumen persitente de prometheus
+    shell: chdir=/kubernetes curl -o /home/kubernetes/prometheus/prometheus-pvc.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/prometheus/prometheus-pvc.yml"
+
+  - name: Descargando el deployment de Prometheus
+    shell: chdir=/kubernetes curl -o ./prometheus-deployment.yaml "https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/prometheus/prometheus-deployment.yaml"
+
+  - name: Creando el namespace monitoring
+    shell: kubectl create namespace monitoring
+    ignore_errors: yes
+
+  - name: Cargando el rol de Prometheus
+    shell: chdir=/home/kubernetes/prometheus kubectl -n monitoring apply -f prometheus-configMap.yaml
+
+  - name: Cargando el servicio de Prometheus
+    shell: chdir=/home/kubernetes/prometheus kubectl -n monitoring apply -f prometheus-role.yaml
+
+  - name: Cargando el volumen de Prometheus
+    shell: chdir=/home/kubernetes/prometheus kubectl -n monitoring apply -f prometheus-service.yaml
+
+  - name: Cargando el volumen persitente de Prometheus
+    shell: chdir=/home/kubernetes/prometheus kubectl -n monitoring apply -f prometheus-pv.yaml
+
+  - name: Cargando la relamación de volumen persitente de Prometheus
+    shell: chdir=/home/kubernetes/prometheus kubectl -n monitoring apply -f prometheus-pvc.yaml
+
+  - name: Cargando el deployment de Prometheus
+    shell: chdir=/home/kubernetes/prometheus kubectl -n monitoring apply -f prometheus-deployment.yaml
