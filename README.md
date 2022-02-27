@@ -4,7 +4,7 @@ yum install ansible<br>
 ansible --version<br>
 
 # Generación de una clave SSH
-ssh-keygen
+ssh-keygen<br>
 ssh-copy-id {user}@{ip} -p {port}
 
 # Añadiendo máquinas
