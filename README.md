@@ -1,9 +1,7 @@
 # Instalación de Ansible
-yum install epel-release
-
-yum install ansible
-
-ansible --version
+yum install epel-release<br>
+yum install ansible<br>
+ansible --version<br>
 
 # Generación de una clave SSH
 ssh-keygen
@@ -19,7 +17,6 @@ ansible -m ping all
 ansible-playbook {filename.yml} --extra-vars "{name var}={value var}"
   
 # Configuraciones disponibles
-	
 ** Minecraft.yaml - Centos 7 - Instalación de un servidor de minecraft 1.17.1<br>
 ** kubernetes.yaml - Centos 7- Instala kubernetes, el nodo maestro es el mismo nodo trabajador.<br>
 ** jenkins.yaml - Centos 7- Instalación de Jenkins.<br>
