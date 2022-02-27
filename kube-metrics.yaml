@@ -1,0 +1,90 @@
+# -- Habilitar la interfaz enp0s3 y crear Adaptador puente --
+# Ves a la configuración de la máquina virtual, subapartado “Red” y selecciona la opción “Adaptador puente”.
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+# Modifica la opción de “ONBOOT=no” a “ONBOOT=yes” y guarda los cambios.
+# service network restart
+# ----
+
+# -- Instalación de SSH --
+# yum –y install openssh-server openssh-clients
+# systemctl start sshd
+# systemctl enable sshd
+# ----
+
+# -- Instlación de Ansible --
+# yum -y install epel-release
+# yum -y install ansible
+# yum -y update
+# ----
+
+# -- Generación de una clave SSH que punta al mismo ordenador --
+# ssh-keygen
+# Pulsa enter y introduce una frase.
+# ssh-copy-id root@{ip}
+# vi /etc/ansible/hosts
+# En caso de que no funcione:
+# ssh-copy-id -i root@{ip}
+# ansible all -m ping -vvv
+# Añade la IP del ordenador al que quieres apuntar
+# mkdir Ansible
+# ----
+
+# -- Comando para instalar el playbook --
+# ansible-playbook tools.yaml --extra-vars "ip=10.0.2.15"
+# ----
+
+# -- Herramientas instaladas --
+# Kube-metrics
+# ----
+---
+- name: Instalando kube-metrics
+  hosts: tools
+  tasks:
+
+  - name: Añadiendo el repositorio de kubernetes-metrics a Helm
+    shell: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ -n kube-system
+
+  - name: Instalando kubernetes-metrics desde helm
+    shell: helm upgrade --install metrics-server metrics-server/metrics-server -n kube-system
+
+  - name: Parando docker
+    shell: systemctl stop docker
+
+  - name: Parando kubelete
+    shell: systemctl stop kubelet
+
+  - name: Purgando iptables I
+    shell: iptables --flush
+
+  - name: Purgando iptables II
+    shell: iptables -tnat --flush
+
+  - name: Iniciando kubelete
+    shell: systemctl start kubelet
+
+  - name: Iniciando docker
+    shell: systemctl start docker
+
+  - name: Esperando a que kubernetes arranque
+    pause:
+      seconds: 30
+
+  - name: Matando el deployment de kubernetes-metrics
+    shell: kubectl -n kube-system delete deployment.apps/metrics-server
+
+  - name: Creando carpeta para kube-metrica
+    shell: mkdir -p /home/kubernetes/kube-metrics
+
+  - name: Descargando Deployment para kubernetes-metrics
+    shell: chdir=/home/kubernetes/kube-metrics wget -nc https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
+    ignore_errors: yes
+
+  - name: Creando el deployment de kubernetes-metrics
+    shell: chdir=/home/kubernetes/kube-metrics kubectl -n kube-system apply -f components.yaml
+
+  - name: Descargando el repositorio de statics-metrics
+    shell: chdir=/home/kubernetes/kube-metrics git clone https://github.com/lisenet/kubernetes-homelab.git
+    ignore_errors: yes
+
+  - name: Cargando kube-state-metrics en el sistema
+    shell: chdir=/home/kubernetes/kube-metrics kubectl apply -f kubernetes-homelab/kube-state-metrics/
