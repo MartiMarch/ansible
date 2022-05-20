@@ -97,19 +97,13 @@
       gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
       EOF
   - name: Instalando kubelet
-    yum:
-      name: kubelet-1.20.0-0
-      state: present
+    shell: yum -y install kubelet-1.20.0-0 --nogpgcheck
 
   - name: Instalando kubeadm
-    yum:
-      name: kubeadm-1.20.0-0
-      state: present
+    shell: yum -y install kubeadm-1.20.0-0 --nogpgcheck
 
   - name: Instalando kubectl
-    yum:
-      name: kubectl-1.20.0-0
-      state: present
+    shell: yum -y install kubectl-1.20.0-0 --nogpgcheck
 
   - name: Iniciando el servicio kubelet y habilitandolo
     ansible.builtin.systemd:
