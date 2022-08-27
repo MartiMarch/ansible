@@ -17,7 +17,7 @@
 ---
 
 - name: Instalacion e Nexus 3
-  hosts: entorno
+  hosts: servidor
   become: true
   tasks:
 

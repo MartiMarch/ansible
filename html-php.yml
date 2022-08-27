@@ -37,7 +37,7 @@
 ---
 
 - name: Instalacion de HTML y PHP
-  hosts: web
+  hosts: servidor
   tasks:
 
   - name: Instalando httpd

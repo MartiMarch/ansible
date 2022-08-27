@@ -1,6 +1,6 @@
 ---
 - name: Instalación de un servidor de minecraft
-  hosts: minecraft
+  hosts: servidor
   ignore_errors: yes
   become: true
 

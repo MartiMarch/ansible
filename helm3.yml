@@ -23,7 +23,7 @@
 ---
 
 - name: Instaalcion e Helm 3
-  hosts: entorno
+  hosts: servidor
   tasks:
 
   - name: Creano carpeta para Helm

@@ -38,7 +38,7 @@
 # ----
 ---
 - name: Instalando kube-metrics
-  hosts: tools
+  hosts: servidor
   tasks:
 
   - name: Añadiendo el repositorio de kubernetes-metrics a Helm

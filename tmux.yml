@@ -34,7 +34,7 @@
 ---
 
 - name: Instalacion y configuración de Tmux
-  host: entorno
+  host: servidor
   tasks:
 
   - name: Instalando tmux

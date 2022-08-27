@@ -34,7 +34,7 @@
 ---
 
 - name: Instalacion de Docker y Docker-Compose
-  hosts: entorno
+  hosts: servidor
   tasks:
 
   - name: Instalando Docker

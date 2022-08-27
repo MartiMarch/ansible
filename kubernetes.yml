@@ -38,7 +38,7 @@
 # Instalación de Kubernetes
 ---
 - name: Instalacion de Kubernetes
-  hosts: kubernetes
+  hosts: servidor
   tasks:
   - name: Instalando yum-utils
     yum:
@@ -185,12 +185,6 @@
   - name: Ejecutando el script
     shell: chdir=/Helm ./get_helm.sh
     
-  - name: Añadiendo el repositorio de kubernetes-metrics a Helm
-    shell: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ -n kube-system
-    
-  - name: Instalando kubernetes-metrics desde helm
-    shell: helm upgrade --install metrics-server metrics-server/metrics-server -n kube-system
-    
   - name: Parando docker
     shell: systemctl stop docker
     
@@ -211,21 +205,4 @@
 
   - name: Esperando a que kubernetes arranque
     pause:
-      seconds: 30
-
-  - name: Matando el deployment de kubernetes-metrics
-    shell: kubectl -n kube-system delete deployment.apps/metrics-server
-  
-  - name: Descargando Deployment para kubernetes-metrics
-    shell: chdir=/kubernetes wget -nc https://raw.githubusercontent.com/MartiMarch/Kubernetes/main/kubernetes-metrics/components.yaml
-    
-  - name: Creando el deployment de kubernetes-metrics
-    shell: chdir=/kubernetes kubectl -n kube-system apply -f components.yaml
-
-  - name: ADVERTENCIA modifica el deployment de kubernetes-metrics en kune-system o ks para dehabilitar el tls
-    ansible.builtin.debug:
-      msg:
-      - "imagePullPolicy: IfNotPresent"
-      - "command:"
-      - "- /metrics-server"
-      - "- --kubelet-insecure-tls"
+      seconds: 30 

@@ -34,7 +34,7 @@
 ---
 
 - name: Instalacion de Maven
-  hosts: entorno
+  hosts: servidor
   tasks:
 
   - name: Instalacion de Maven

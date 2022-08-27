@@ -33,7 +33,7 @@
 # Instalación de Nifi, Centos 7
 ---
 - name: Instalacion de Nifi
-  hosts: Nifi
+  hosts: servidor
   tasks:
 
   - name: Instalando Java

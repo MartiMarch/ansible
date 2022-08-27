@@ -23,7 +23,7 @@
 ---
 
 - name: Instalacion de JDK 16
-  hosts: entorno
+  hosts: servidor
   tasks:
 
   - name: Instalando JDK 16

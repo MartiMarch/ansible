@@ -39,7 +39,7 @@
 # ----
 ---
 - name: Iniciando el entorno
-  hosts: tools
+  hosts: servidor
   tasks:
 
   - name: Creando la carpeta para Grafana

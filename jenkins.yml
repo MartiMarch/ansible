@@ -22,7 +22,7 @@
 # Instalación de Jenkins, Centos 7
 ---
 - name: Instalacion de Jenkins, Maven y SonarQube
-  hosts: DevOps
+  hosts: servidor
   tasks:
 
   - name: Instalando Java 11

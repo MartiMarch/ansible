@@ -42,7 +42,7 @@
 #  Nexus
 ---
 - name: Iniciando el entorno
-  hosts: entorno
+  hosts: servidor
   tasks:
 
   - name: Instalacion de Git
